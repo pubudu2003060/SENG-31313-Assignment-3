@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
 import { verifyAccess, verifyRefresh } from "../utils/Tokens.js";
 
@@ -24,19 +23,15 @@ export const verifyAccessToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Token verification failed:", error);
-    return res.status(403).json({ message: "Invalid token" });
+    console.error("Access Token verification failed:", error);
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
 
 export const verifyRefreshToken = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.refreshToken;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const token = authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No refresh token" });
 
   try {
     const decoded = verifyRefresh(token);
@@ -51,7 +46,7 @@ export const verifyRefreshToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Token verification failed:", error);
+    console.error("Refresh Token verification failed:", error);
     return res.status(403).json({ message: "Invalid token" });
   }
 };

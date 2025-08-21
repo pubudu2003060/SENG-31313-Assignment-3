@@ -10,7 +10,6 @@ const Item = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  console.log("Item ID:", id);
   const [book, setBook] = useState(null);
   const [error, setError] = useState(null);
 
@@ -99,8 +98,8 @@ const Item = () => {
         });
       }
     } catch (error) {
-      console.error("Error adding book to cart:", error);
-      toast.error("Error to add book to cart", {
+      console.log(error);
+      toast.error(error.response.data.message, {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,

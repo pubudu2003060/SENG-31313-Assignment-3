@@ -1,16 +1,17 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { freeAxios, JWTAxios } from "../../api/Axios";
-import { useNavigate } from "react-router-dom";
-
-import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { logedIn } from "../../state/user/UserSlice";
 import { increaseCountByAmount } from "../../state/cart/CartSlice";
+import googleimage from "../../assets/icons8-google-48.png";
 
 const SignIn = () => {
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -24,6 +25,7 @@ const SignIn = () => {
     try {
       const responce = await JWTAxios.get("/cart/getcartsize");
       if (responce.data.status) {
+        console.log(responce.data.length);
         dispatch(increaseCountByAmount(responce.data.length));
       } else {
       }
@@ -88,16 +90,50 @@ const SignIn = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/api/user/googlesignin";
+  };
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramValueStatus = searchParams.get("status");
+  const tokenValue = searchParams.get("accessToken");
+
+  useEffect(() => {
+    const googleSignin = () => {
+      if (!paramValueStatus) return;
+
+      if (paramValueStatus === "fail") {
+        toast.error("User signed in failed", {
+          position: "top-center",
+          autoClose: 5000,
+          theme: "dark",
+        });
+        navigate("/signin", { replace: true });
+      }
+
+      if (paramValueStatus === "success" && tokenValue) {
+        localStorage.setItem("accessToken", tokenValue);
+        toast.success("User signed in successfully", {
+          position: "top-center",
+          autoClose: 5000,
+          theme: "dark",
+        });
+        getCartLength();
+        dispatch(logedIn());
+        navigate("/", { replace: true });
+      }
+    };
+
+    googleSignin();
+  }, [paramValueStatus, tokenValue]);
+
   return (
     <main className="min-h-[calc(100vh-80px)] bg-white dark:bg-[#1a1611] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md bg-neutral-50 dark:bg-[#2d251f] p-6 rounded-lg shadow-md border border-neutral-200 dark:border-[#3d342a]">
         <h2 className="text-2xl md:text-3xl font-heading text-neutral-900 dark:text-neutral-100 mb-6 text-center">
           Sign In
         </h2>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-neutral-50 dark:bg-[#2d251f] p-6 rounded-lg shadow-md border border-neutral-200 dark:border-[#3d342a]"
-        >
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -142,6 +178,21 @@ const SignIn = () => {
             Sign In
           </button>
         </form>
+
+        <div className="mt-5">
+          <p className=" text-amber-700 dark:text-amber-200">
+            I dont have an accout.<Link to="/signup">Sign up</Link>
+          </p>
+        </div>
+
+        <div className="mt-5 flex items-center justify-center gap-2 p-2">
+          <p className="text-amber-700 dark:text-amber-200">
+            Sign in with Google
+          </p>
+          <button onClick={handleGoogleLogin}>
+            <img src={googleimage} alt="Google Sign In" className="w-6 h-6" />
+          </button>
+        </div>
       </div>
     </main>
   );

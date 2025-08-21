@@ -2,6 +2,7 @@ import User from "../models/User.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Cart from "../models/Cart.model.js";
+import { signAccessToken, signRefreshToken } from "../utils/Tokens.js";
 
 export const signupUser = async (req, res) => {
   try {
@@ -28,7 +29,15 @@ export const signupUser = async (req, res) => {
 
     await newUser.save();
 
-    const accessToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+    const accessToken = signAccessToken(newUser._id.toString());
+    const refreshToken = signRefreshToken(newUser._id.toString());
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(201).json({
       status: true,
@@ -65,10 +74,35 @@ export const signinUser = async (req, res) => {
       return;
     }
 
-    const accessToken = jwt.sign(
-      { id: existingUSer._id },
-      process.env.JWT_SECRET
-    );
+    const accessToken = signAccessToken(existingUSer._id.toString());
+    const refreshToken = signRefreshToken(existingUSer._id.toString());
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "User signIn successfully",
+      accessToken,
+    });
+  } catch (error) {
+    console.error("Error in signInUser:", error);
+    res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const accessToken = signAccessToken(userId);
 
     res.status(201).json({
       status: true,
