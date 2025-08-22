@@ -4,12 +4,10 @@ import { freeAxios, JWTAxios } from "../../api/Axios";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logedIn } from "../../state/user/UserSlice";
-import { increaseCountByAmount } from "../../state/cart/CartSlice";
 import googleimage from "../../assets/icons8-google-48.png";
 
 const SignIn = () => {
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -21,24 +19,11 @@ const SignIn = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const getCartLength = async () => {
-    try {
-      const responce = await JWTAxios.get("/cart/getcartsize");
-      if (responce.data.status) {
-        console.log(responce.data.length);
-        dispatch(increaseCountByAmount(responce.data.length));
-      } else {
-      }
-    } catch (error) {
-      console.log("Error in get cart size: ", error.message);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const responce = await freeAxios.post("/user/signin", {
+      const responce = await freeAxios.post("/auth/signin", {
         email: form.email,
         password: form.password,
       });
@@ -60,7 +45,7 @@ const SignIn = () => {
           email: "",
           password: "",
         });
-        getCartLength();
+
         dispatch(logedIn());
         navigate("/");
       } else {
@@ -91,7 +76,7 @@ const SignIn = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/user/googlesignin";
+    window.location.href = "http://localhost:5000/api/auth/googlesignin";
   };
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -118,7 +103,7 @@ const SignIn = () => {
           autoClose: 5000,
           theme: "dark",
         });
-        getCartLength();
+
         dispatch(logedIn());
         navigate("/", { replace: true });
       }
@@ -128,16 +113,16 @@ const SignIn = () => {
   }, [paramValueStatus, tokenValue]);
 
   return (
-    <main className="min-h-[calc(100vh-80px)] bg-white dark:bg-[#1a1611] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md bg-neutral-50 dark:bg-[#2d251f] p-6 rounded-lg shadow-md border border-neutral-200 dark:border-[#3d342a]">
-        <h2 className="text-2xl md:text-3xl font-heading text-neutral-900 dark:text-neutral-100 mb-6 text-center">
+    <main className="min-h-[calc(100vh-80px)] bg-theme flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md bg-theme-neutral p-6 rounded-lg shadow-lg border border-theme-secondary">
+        <h2 className="text-2xl md:text-3xl font-heading text-theme-primary mb-6 text-center font-bold">
           Sign In
         </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
             <label
               htmlFor="email"
-              className="block font-body text-amber-700 dark:text-amber-200 mb-2"
+              className="block font-body text-theme-secondary mb-2 font-medium"
             >
               Email
             </label>
@@ -148,14 +133,14 @@ const SignIn = () => {
               value={form.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 bg-white dark:bg-[#1a1611] text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-[#3d342a] rounded-md focus:outline-none focus:ring-2 focus:ring-green-800 dark:focus:ring-green-700 transition-colors"
+              className="w-full px-4 py-2 bg-theme text-theme border border-theme-secondary rounded-md focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all duration-300"
               placeholder="Enter your email"
             />
           </div>
-          <div className="mb-6">
+          <div>
             <label
               htmlFor="password"
-              className="block font-body text-amber-700 dark:text-amber-200 mb-2"
+              className="block font-body text-theme-secondary mb-2 font-medium"
             >
               Password
             </label>
@@ -166,30 +151,37 @@ const SignIn = () => {
               value={form.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 bg-white dark:bg-[#1a1611] text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-[#3d342a] rounded-md focus:outline-none focus:ring-2 focus:ring-green-800 dark:focus:ring-green-700 transition-colors"
+              className="w-full px-4 py-2 bg-theme text-theme border border-theme-secondary rounded-md focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all duration-300"
               placeholder="Enter your password"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-orange-600 dark:bg-orange-500 text-neutral-100 dark:text-neutral-900 px-4 py-2 rounded-md hover:bg-green-800 dark:hover:bg-green-700 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-green-800 dark:focus:ring-green-700"
+            className="w-full bg-theme-primary text-theme-neutral px-4 py-2 rounded-md hover:bg-theme-accent hover:text-theme font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-theme-primary transform hover:scale-105"
           >
             Sign In
           </button>
         </form>
 
         <div className="mt-5">
-          <p className=" text-amber-700 dark:text-amber-200">
-            I dont have an accout.<Link to="/signup">Sign up</Link>
+          <p className="text-theme-secondary">
+            I dont have an account.{" "}
+            <Link
+              to="/signup"
+              className="text-theme-accent hover:text-theme-primary transition-colors duration-300 font-medium"
+            >
+              Sign up
+            </Link>
           </p>
         </div>
 
-        <div className="mt-5 flex items-center justify-center gap-2 p-2">
-          <p className="text-amber-700 dark:text-amber-200">
-            Sign in with Google
-          </p>
-          <button onClick={handleGoogleLogin}>
+        <div className="mt-5 flex items-center justify-center gap-3 p-2">
+          <p className="text-theme-secondary">Sign in with Google</p>
+          <button
+            onClick={handleGoogleLogin}
+            className="hover:scale-110 transition-transform duration-300"
+          >
             <img src={googleimage} alt="Google Sign In" className="w-6 h-6" />
           </button>
         </div>

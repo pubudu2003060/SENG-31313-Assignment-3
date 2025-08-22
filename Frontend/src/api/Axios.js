@@ -1,5 +1,4 @@
 import axios from "axios";
-import { toast } from "react-toastify";
 
 export const freeAxios = axios.create({
   baseURL: "http://localhost:5000/api",
@@ -42,7 +41,7 @@ JWTAxios.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const res = await freeAxios.get("/user/refreshaccesstoken");
+        const res = await freeAxios.get("/auth/refreshaccesstoken");
         const newAccessToken = res.data.accessToken;
 
         localStorage.setItem("accessToken", newAccessToken);

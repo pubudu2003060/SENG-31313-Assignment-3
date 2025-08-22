@@ -1,33 +1,9 @@
 import express from "express";
-import {
-  signupUser,
-  signinUser,
-  refreshToken,
-} from "../controllers/User.controler.js";
-import {
-  googleSignin,
-  googleSigninCallBack,
-  handleGoogleFailure,
-  handleGoogleLogin,
-} from "../controllers/GoogleAuth.controler.js";
-import { verifyAccessToken, verifyRefreshToken } from "../middleware/auth.js";
+import { verifyAccessToken } from "../middleware/auth.js";
+import { isLoged } from "../controllers/User.controler.js";
 
-const userRouter = express.Router();
+const userRoute = express.Router();
 
-userRouter.post("/signup", signupUser);
+userRoute.get("/isloged", verifyAccessToken, isLoged);
 
-userRouter.post("/signin", signinUser);
-
-userRouter.get("/googlesignin", googleSignin);
-
-userRouter.get(
-  "/googlesignin/callback",
-  googleSigninCallBack,
-  handleGoogleLogin
-);
-
-userRouter.get("/googlesignin/failure", handleGoogleFailure);
-
-userRouter.get("/refreshaccesstoken", verifyRefreshToken, refreshToken);
-
-export default userRouter;
+export default userRoute;
